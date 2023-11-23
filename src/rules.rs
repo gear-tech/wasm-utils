@@ -65,8 +65,6 @@ pub enum InstructionType {
 	Nop,
 	CurrentMemory,
 	GrowMemory,
-
-	#[cfg(feature = "sign_ext")]
 	SignExt,
 }
 
@@ -95,8 +93,6 @@ impl FromStr for InstructionType {
 			"nop" => Ok(InstructionType::Nop),
 			"current_mem" => Ok(InstructionType::CurrentMemory),
 			"grow_mem" => Ok(InstructionType::GrowMemory),
-
-			#[cfg(feature = "sign_ext")]
 			"sign_ext" => Ok(InstructionType::SignExt),
 
 			_ => Err(UnknownInstruction),
@@ -298,7 +294,6 @@ impl InstructionType {
 			F32ReinterpretI32 => InstructionType::Reinterpretation,
 			F64ReinterpretI64 => InstructionType::Reinterpretation,
 
-			#[cfg(feature = "sign_ext")]
 			SignExt(_) => InstructionType::SignExt,
 		}
 	}

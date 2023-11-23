@@ -4,7 +4,6 @@ use super::{resolve_func_type, Error};
 use log::trace;
 use parity_wasm::elements::{self, BlockType, Type};
 
-#[cfg(feature = "sign_ext")]
 use parity_wasm::elements::SignExtInstruction;
 
 /// Control stack frame.
@@ -111,7 +110,7 @@ impl Stack {
 	fn pop_values(&mut self, value_count: u32) -> Result<(), Error> {
 		trace!(target: "max_height", "pop: {}", value_count);
 		if value_count == 0 {
-			return Ok(())
+			return Ok(());
 		}
 		{
 			let top_frame = self.frame(0)?;
@@ -123,7 +122,7 @@ impl Stack {
 					Ok(())
 				} else {
 					Err(Error("trying to pop more values than pushed".into()))
-				}
+				};
 			}
 		}
 
@@ -179,7 +178,7 @@ pub(crate) fn compute(func_idx: u32, module: &elements::Module) -> Result<u32, E
 
 	loop {
 		if pc >= instructions.elements().len() {
-			break
+			break;
 		}
 
 		// If current value stack is higher than maximal height observed so far,
@@ -247,7 +246,7 @@ pub(crate) fn compute(func_idx: u32, module: &elements::Module) -> Result<u32, E
 				for target in &*br_table_data.table {
 					let arity = stack.frame(*target)?.branch_arity;
 					if arity != arity_of_default {
-						return Err(Error("Arity of all jump-targets must be equal".into()))
+						return Err(Error("Arity of all jump-targets must be equal".into()));
 					}
 				}
 
@@ -320,35 +319,35 @@ pub(crate) fn compute(func_idx: u32, module: &elements::Module) -> Result<u32, E
 			SetGlobal(_) => {
 				stack.pop_values(1)?;
 			},
-			I32Load(_, _) |
-			I64Load(_, _) |
-			F32Load(_, _) |
-			F64Load(_, _) |
-			I32Load8S(_, _) |
-			I32Load8U(_, _) |
-			I32Load16S(_, _) |
-			I32Load16U(_, _) |
-			I64Load8S(_, _) |
-			I64Load8U(_, _) |
-			I64Load16S(_, _) |
-			I64Load16U(_, _) |
-			I64Load32S(_, _) |
-			I64Load32U(_, _) => {
+			I32Load(_, _)
+			| I64Load(_, _)
+			| F32Load(_, _)
+			| F64Load(_, _)
+			| I32Load8S(_, _)
+			| I32Load8U(_, _)
+			| I32Load16S(_, _)
+			| I32Load16U(_, _)
+			| I64Load8S(_, _)
+			| I64Load8U(_, _)
+			| I64Load16S(_, _)
+			| I64Load16U(_, _)
+			| I64Load32S(_, _)
+			| I64Load32U(_, _) => {
 				// These instructions pop the address and pushes the result,
 				// which effictively don't modify the stack height.
 				stack.pop_values(1)?;
 				stack.push_values(1)?;
 			},
 
-			I32Store(_, _) |
-			I64Store(_, _) |
-			F32Store(_, _) |
-			F64Store(_, _) |
-			I32Store8(_, _) |
-			I32Store16(_, _) |
-			I64Store8(_, _) |
-			I64Store16(_, _) |
-			I64Store32(_, _) => {
+			I32Store(_, _)
+			| I64Store(_, _)
+			| F32Store(_, _)
+			| F64Store(_, _)
+			| I32Store8(_, _)
+			| I32Store16(_, _)
+			| I64Store8(_, _)
+			| I64Store16(_, _)
+			| I64Store32(_, _) => {
 				// These instructions pop the address and the value.
 				stack.pop_values(2)?;
 			},
@@ -375,51 +374,50 @@ pub(crate) fn compute(func_idx: u32, module: &elements::Module) -> Result<u32, E
 				stack.push_values(1)?;
 			},
 
-			I32Eq | I32Ne | I32LtS | I32LtU | I32GtS | I32GtU | I32LeS | I32LeU | I32GeS |
-			I32GeU | I64Eq | I64Ne | I64LtS | I64LtU | I64GtS | I64GtU | I64LeS | I64LeU |
-			I64GeS | I64GeU | F32Eq | F32Ne | F32Lt | F32Gt | F32Le | F32Ge | F64Eq | F64Ne |
-			F64Lt | F64Gt | F64Le | F64Ge => {
+			I32Eq | I32Ne | I32LtS | I32LtU | I32GtS | I32GtU | I32LeS | I32LeU | I32GeS
+			| I32GeU | I64Eq | I64Ne | I64LtS | I64LtU | I64GtS | I64GtU | I64LeS | I64LeU
+			| I64GeS | I64GeU | F32Eq | F32Ne | F32Lt | F32Gt | F32Le | F32Ge | F64Eq | F64Ne
+			| F64Lt | F64Gt | F64Le | F64Ge => {
 				// Comparison operations take two operands and produce one result.
 				stack.pop_values(2)?;
 				stack.push_values(1)?;
 			},
 
-			I32Clz | I32Ctz | I32Popcnt | I64Clz | I64Ctz | I64Popcnt | F32Abs | F32Neg |
-			F32Ceil | F32Floor | F32Trunc | F32Nearest | F32Sqrt | F64Abs | F64Neg | F64Ceil |
-			F64Floor | F64Trunc | F64Nearest | F64Sqrt => {
+			I32Clz | I32Ctz | I32Popcnt | I64Clz | I64Ctz | I64Popcnt | F32Abs | F32Neg
+			| F32Ceil | F32Floor | F32Trunc | F32Nearest | F32Sqrt | F64Abs | F64Neg | F64Ceil
+			| F64Floor | F64Trunc | F64Nearest | F64Sqrt => {
 				// Unary operators take one operand and produce one result.
 				stack.pop_values(1)?;
 				stack.push_values(1)?;
 			},
 
-			I32Add | I32Sub | I32Mul | I32DivS | I32DivU | I32RemS | I32RemU | I32And | I32Or |
-			I32Xor | I32Shl | I32ShrS | I32ShrU | I32Rotl | I32Rotr | I64Add | I64Sub |
-			I64Mul | I64DivS | I64DivU | I64RemS | I64RemU | I64And | I64Or | I64Xor | I64Shl |
-			I64ShrS | I64ShrU | I64Rotl | I64Rotr | F32Add | F32Sub | F32Mul | F32Div |
-			F32Min | F32Max | F32Copysign | F64Add | F64Sub | F64Mul | F64Div | F64Min |
-			F64Max | F64Copysign => {
+			I32Add | I32Sub | I32Mul | I32DivS | I32DivU | I32RemS | I32RemU | I32And | I32Or
+			| I32Xor | I32Shl | I32ShrS | I32ShrU | I32Rotl | I32Rotr | I64Add | I64Sub
+			| I64Mul | I64DivS | I64DivU | I64RemS | I64RemU | I64And | I64Or | I64Xor | I64Shl
+			| I64ShrS | I64ShrU | I64Rotl | I64Rotr | F32Add | F32Sub | F32Mul | F32Div
+			| F32Min | F32Max | F32Copysign | F64Add | F64Sub | F64Mul | F64Div | F64Min
+			| F64Max | F64Copysign => {
 				// Binary operators take two operands and produce one result.
 				stack.pop_values(2)?;
 				stack.push_values(1)?;
 			},
 
-			I32WrapI64 | I32TruncSF32 | I32TruncUF32 | I32TruncSF64 | I32TruncUF64 |
-			I64ExtendSI32 | I64ExtendUI32 | I64TruncSF32 | I64TruncUF32 | I64TruncSF64 |
-			I64TruncUF64 | F32ConvertSI32 | F32ConvertUI32 | F32ConvertSI64 | F32ConvertUI64 |
-			F32DemoteF64 | F64ConvertSI32 | F64ConvertUI32 | F64ConvertSI64 | F64ConvertUI64 |
-			F64PromoteF32 | I32ReinterpretF32 | I64ReinterpretF64 | F32ReinterpretI32 |
-			F64ReinterpretI64 => {
+			I32WrapI64 | I32TruncSF32 | I32TruncUF32 | I32TruncSF64 | I32TruncUF64
+			| I64ExtendSI32 | I64ExtendUI32 | I64TruncSF32 | I64TruncUF32 | I64TruncSF64
+			| I64TruncUF64 | F32ConvertSI32 | F32ConvertUI32 | F32ConvertSI64 | F32ConvertUI64
+			| F32DemoteF64 | F64ConvertSI32 | F64ConvertUI32 | F64ConvertSI64 | F64ConvertUI64
+			| F64PromoteF32 | I32ReinterpretF32 | I64ReinterpretF64 | F32ReinterpretI32
+			| F64ReinterpretI64 => {
 				// Conversion operators take one value and produce one result.
 				stack.pop_values(1)?;
 				stack.push_values(1)?;
 			},
 
-			#[cfg(feature = "sign_ext")]
-			SignExt(SignExtInstruction::I32Extend8S) |
-			SignExt(SignExtInstruction::I32Extend16S) |
-			SignExt(SignExtInstruction::I64Extend8S) |
-			SignExt(SignExtInstruction::I64Extend16S) |
-			SignExt(SignExtInstruction::I64Extend32S) => {
+			SignExt(SignExtInstruction::I32Extend8S)
+			| SignExt(SignExtInstruction::I32Extend16S)
+			| SignExt(SignExtInstruction::I64Extend8S)
+			| SignExt(SignExtInstruction::I64Extend16S)
+			| SignExt(SignExtInstruction::I64Extend32S) => {
 				stack.pop_values(1)?;
 				stack.push_values(1)?;
 			},
